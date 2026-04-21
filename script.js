@@ -35,7 +35,17 @@ if (document.getElementById('bg-music')) {
 }
 
 function initPage() {
+    if (!window.__ojitosPopstateBound) {
+        window.__ojitosPopstateBound = true
+        window.addEventListener('popstate', () => {
+            window.location.reload()
+        })
+    }
+
     const elements = {
+        container: document.querySelector('.container'),
+        title: document.querySelector('.container h1'),
+        buttons: document.querySelector('.buttons'),
         catGif: document.getElementById('cat-gif'),
         yesBtn: document.getElementById('yes-btn'),
         noBtn: document.getElementById('no-btn'),
@@ -52,6 +62,7 @@ function initPage() {
         yesTeasedCount: 0,
         noClickCount: 0,
         runawayEnabled: false,
+        yesScreenVisible: false,
         musicPlaying: true,
         teaseToastTimerId: null
     }
@@ -120,7 +131,7 @@ function handleYesClick(state, elements) {
         return
     }
 
-    window.location.href = 'yes.html'
+    showYesScreen(state, elements)
 }
 
 function showTeaseMessage(state, teaseToast, msg) {
@@ -199,4 +210,97 @@ function runAway(noBtn) {
     noBtn.style.left = `${randomX}px`
     noBtn.style.top = `${randomY}px`
     noBtn.style.zIndex = '50'
+}
+
+function showYesScreen(state, elements) {
+    if (state.yesScreenVisible || !elements.container || !elements.title || !elements.buttons) {
+        return
+    }
+
+    state.yesScreenVisible = true
+
+    document.title = '¡Sí! 🎉'
+    window.history.pushState({ screen: 'yes' }, '', 'yes.html')
+
+    elements.container.classList.add('yes-container')
+    elements.title.classList.add('yes-title')
+    elements.title.textContent = 'Sabía que ibas a decir que sí… 😏🎉'
+
+    elements.catGif.src = 'assets/ojitos.jpg'
+    elements.catGif.alt = 'Ojitos'
+    elements.catGif.classList.add('ojitos-photo')
+
+    elements.buttons.remove()
+    elements.teaseToast.remove()
+
+    const yesMessage = document.createElement('p')
+    yesMessage.className = 'yes-message'
+    yesMessage.textContent = 'Acabas de hacerme la persona más feliz del mundo 💕'
+    elements.container.appendChild(yesMessage)
+
+    ensureConfettiLoaded()
+        .then(() => {
+            if (typeof confetti === 'function') {
+                launchConfetti()
+            }
+        })
+        .catch(() => {})
+}
+
+let confettiScriptPromise = null
+
+function ensureConfettiLoaded() {
+    if (typeof confetti === 'function') {
+        return Promise.resolve()
+    }
+
+    if (confettiScriptPromise) {
+        return confettiScriptPromise
+    }
+
+    confettiScriptPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js'
+        script.onload = resolve
+        script.onerror = reject
+        document.head.appendChild(script)
+    })
+
+    return confettiScriptPromise
+}
+
+function launchConfetti() {
+    const colors = ['#ff69b4', '#ff1493', '#ff85a2', '#ffb3c1', '#ff0000', '#ff6347', '#fff', '#ffdf00']
+    const duration = 6000
+    const end = Date.now() + duration
+
+    confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { x: 0.5, y: 0.3 },
+        colors
+    })
+
+    const interval = setInterval(() => {
+        if (Date.now() > end) {
+            clearInterval(interval)
+            return
+        }
+
+        confetti({
+            particleCount: 40,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.6 },
+            colors
+        })
+
+        confetti({
+            particleCount: 40,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.6 },
+            colors
+        })
+    }, 300)
 }
