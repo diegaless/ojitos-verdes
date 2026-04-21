@@ -49,6 +49,7 @@ function initPage() {
         noClickCount: 0,
         runawayEnabled: false,
         musicPlaying: true,
+        pendingAutoplayResume: false,
         teaseToastTimerId: null
     }
 
@@ -63,15 +64,25 @@ function initializeMusic(state, elements) {
     const { music, musicToggle } = elements
 
     music.autoplay = true
-    music.defaultMuted = false
-    music.muted = false
+    music.defaultMuted = true
+    music.muted = true
     music.volume = 0.3
 
-    tryStartMusic(state, music, musicToggle)
+    music.play().then(() => {
+        music.muted = false
+        state.musicPlaying = true
+        state.pendingAutoplayResume = false
+        updateMusicToggle(musicToggle, true)
+    }).catch(() => {
+        state.musicPlaying = true
+        state.pendingAutoplayResume = true
+        updateMusicToggle(musicToggle, true)
+    })
 
     const resumeOnFirstInteraction = () => {
-        if (!state.musicPlaying) {
-            tryStartMusic(state, music, musicToggle)
+        if (state.pendingAutoplayResume) {
+            music.muted = false
+            tryStartMusic(state, music, musicToggle, { optimistic: true })
         }
     }
 
@@ -79,13 +90,15 @@ function initializeMusic(state, elements) {
     document.addEventListener('keydown', resumeOnFirstInteraction, { once: true })
 }
 
-function tryStartMusic(state, music, musicToggle) {
+function tryStartMusic(state, music, musicToggle, options = {}) {
     music.play().then(() => {
         state.musicPlaying = true
+        state.pendingAutoplayResume = false
         updateMusicToggle(musicToggle, true)
     }).catch(() => {
-        state.musicPlaying = false
-        updateMusicToggle(musicToggle, false)
+        state.musicPlaying = options.optimistic ? true : false
+        state.pendingAutoplayResume = Boolean(options.optimistic)
+        updateMusicToggle(musicToggle, state.musicPlaying)
     })
 }
 
@@ -102,6 +115,7 @@ function toggleMusic(state, elements) {
     if (state.musicPlaying) {
         music.pause()
         state.musicPlaying = false
+        state.pendingAutoplayResume = false
         updateMusicToggle(musicToggle, false)
         return
     }

@@ -9,7 +9,8 @@ function initPage() {
     }
 
     const state = {
-        musicPlaying: false,
+        musicPlaying: true,
+        pendingAutoplayResume: false,
         prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches
     }
 
@@ -28,11 +29,11 @@ function initializeMusic(state, music, musicToggle) {
     music.muted = false
     music.volume = 0.3
 
-    tryStartMusic(state, music, musicToggle)
+    tryStartMusic(state, music, musicToggle, { optimistic: true })
 
     const resumeOnFirstInteraction = () => {
-        if (!state.musicPlaying) {
-            tryStartMusic(state, music, musicToggle)
+        if (state.pendingAutoplayResume) {
+            tryStartMusic(state, music, musicToggle, { optimistic: true })
         }
     }
 
@@ -40,13 +41,15 @@ function initializeMusic(state, music, musicToggle) {
     document.addEventListener('keydown', resumeOnFirstInteraction, { once: true })
 }
 
-function tryStartMusic(state, music, musicToggle) {
+function tryStartMusic(state, music, musicToggle, options = {}) {
     music.play().then(() => {
         state.musicPlaying = true
+        state.pendingAutoplayResume = false
         updateMusicToggle(musicToggle, true)
     }).catch(() => {
-        state.musicPlaying = false
-        updateMusicToggle(musicToggle, false)
+        state.musicPlaying = options.optimistic ? true : false
+        state.pendingAutoplayResume = Boolean(options.optimistic)
+        updateMusicToggle(musicToggle, state.musicPlaying)
     })
 }
 
@@ -61,17 +64,12 @@ function toggleMusic(state, music, musicToggle) {
     if (state.musicPlaying) {
         music.pause()
         state.musicPlaying = false
+        state.pendingAutoplayResume = false
         updateMusicToggle(musicToggle, false)
         return
     }
 
-    music.play().then(() => {
-        state.musicPlaying = true
-        updateMusicToggle(musicToggle, true)
-    }).catch(() => {
-        state.musicPlaying = false
-        updateMusicToggle(musicToggle, false)
-    })
+    tryStartMusic(state, music, musicToggle)
 }
 
 function launchConfetti() {
