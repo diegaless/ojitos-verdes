@@ -28,7 +28,11 @@ const yesTeasePokes = [
     'haz clic en no, te reto 😏'
 ]
 
-document.addEventListener('DOMContentLoaded', initPage)
+if (document.getElementById('bg-music')) {
+    initPage()
+} else {
+    document.addEventListener('DOMContentLoaded', initPage, { once: true })
+}
 
 function initPage() {
     const elements = {
@@ -49,7 +53,6 @@ function initPage() {
         noClickCount: 0,
         runawayEnabled: false,
         musicPlaying: true,
-        pendingAutoplayResume: false,
         teaseToastTimerId: null
     }
 
@@ -71,40 +74,17 @@ function initializeMusic(state, elements) {
     music.play().then(() => {
         music.muted = false
         state.musicPlaying = true
-        state.pendingAutoplayResume = false
         updateMusicToggle(musicToggle, true)
     }).catch(() => {
         state.musicPlaying = true
-        state.pendingAutoplayResume = true
         updateMusicToggle(musicToggle, true)
-    })
 
-    let firstInteractionHandled = false
-
-    const unlockAudioOnFirstInteraction = () => {
-        if (firstInteractionHandled) {
-            return
-        }
-
-        firstInteractionHandled = true
-        music.muted = false
-        tryStartMusic(state, music, musicToggle, { optimistic: true })
-    }
-
-    document.addEventListener('pointerdown', unlockAudioOnFirstInteraction, { once: true })
-    document.addEventListener('touchstart', unlockAudioOnFirstInteraction, { once: true, passive: true })
-    document.addEventListener('keydown', unlockAudioOnFirstInteraction, { once: true })
-}
-
-function tryStartMusic(state, music, musicToggle, options = {}) {
-    music.play().then(() => {
-        state.musicPlaying = true
-        state.pendingAutoplayResume = false
-        updateMusicToggle(musicToggle, true)
-    }).catch(() => {
-        state.musicPlaying = options.optimistic ? true : false
-        state.pendingAutoplayResume = Boolean(options.optimistic)
-        updateMusicToggle(musicToggle, state.musicPlaying)
+        document.addEventListener('click', () => {
+            music.muted = false
+            music.play().catch(() => {})
+            state.musicPlaying = true
+            updateMusicToggle(musicToggle, true)
+        }, { once: true })
     })
 }
 
@@ -121,7 +101,6 @@ function toggleMusic(state, elements) {
     if (state.musicPlaying) {
         music.pause()
         state.musicPlaying = false
-        state.pendingAutoplayResume = false
         updateMusicToggle(musicToggle, false)
         return
     }
@@ -130,10 +109,7 @@ function toggleMusic(state, elements) {
     music.play().then(() => {
         state.musicPlaying = true
         updateMusicToggle(musicToggle, true)
-    }).catch(() => {
-        state.musicPlaying = false
-        updateMusicToggle(musicToggle, false)
-    })
+    }).catch(() => {})
 }
 
 function handleYesClick(state, elements) {

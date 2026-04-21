@@ -1,4 +1,8 @@
-document.addEventListener('DOMContentLoaded', initPage)
+if (document.readyState === 'complete') {
+    initPage()
+} else {
+    window.addEventListener('load', initPage, { once: true })
+}
 
 function initPage() {
     const music = document.getElementById('bg-music')
@@ -9,8 +13,7 @@ function initPage() {
     }
 
     const state = {
-        musicPlaying: true,
-        pendingAutoplayResume: false,
+        musicPlaying: false,
         prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches
     }
 
@@ -29,27 +32,12 @@ function initializeMusic(state, music, musicToggle) {
     music.muted = false
     music.volume = 0.3
 
-    tryStartMusic(state, music, musicToggle, { optimistic: true })
-
-    const resumeOnFirstInteraction = () => {
-        if (state.pendingAutoplayResume) {
-            tryStartMusic(state, music, musicToggle, { optimistic: true })
-        }
-    }
-
-    document.addEventListener('pointerdown', resumeOnFirstInteraction, { once: true })
-    document.addEventListener('keydown', resumeOnFirstInteraction, { once: true })
-}
-
-function tryStartMusic(state, music, musicToggle, options = {}) {
     music.play().then(() => {
         state.musicPlaying = true
-        state.pendingAutoplayResume = false
         updateMusicToggle(musicToggle, true)
     }).catch(() => {
-        state.musicPlaying = options.optimistic ? true : false
-        state.pendingAutoplayResume = Boolean(options.optimistic)
-        updateMusicToggle(musicToggle, state.musicPlaying)
+        state.musicPlaying = true
+        updateMusicToggle(musicToggle, true)
     })
 }
 
@@ -64,12 +52,14 @@ function toggleMusic(state, music, musicToggle) {
     if (state.musicPlaying) {
         music.pause()
         state.musicPlaying = false
-        state.pendingAutoplayResume = false
         updateMusicToggle(musicToggle, false)
         return
     }
 
-    tryStartMusic(state, music, musicToggle)
+    music.play().then(() => {
+        state.musicPlaying = true
+        updateMusicToggle(musicToggle, true)
+    }).catch(() => {})
 }
 
 function launchConfetti() {
