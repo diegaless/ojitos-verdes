@@ -62,24 +62,30 @@ function initPage() {
 function initializeMusic(state, elements) {
     const { music, musicToggle } = elements
 
-    music.muted = true
+    music.autoplay = true
+    music.defaultMuted = false
+    music.muted = false
     music.volume = 0.3
 
+    tryStartMusic(state, music, musicToggle)
+
+    const resumeOnFirstInteraction = () => {
+        if (!state.musicPlaying) {
+            tryStartMusic(state, music, musicToggle)
+        }
+    }
+
+    document.addEventListener('pointerdown', resumeOnFirstInteraction, { once: true })
+    document.addEventListener('keydown', resumeOnFirstInteraction, { once: true })
+}
+
+function tryStartMusic(state, music, musicToggle) {
     music.play().then(() => {
-        music.muted = false
         state.musicPlaying = true
         updateMusicToggle(musicToggle, true)
     }).catch(() => {
         state.musicPlaying = false
         updateMusicToggle(musicToggle, false)
-
-        document.addEventListener('click', () => {
-            music.muted = false
-            music.play().then(() => {
-                state.musicPlaying = true
-                updateMusicToggle(musicToggle, true)
-            }).catch(() => {})
-        }, { once: true })
     })
 }
 
