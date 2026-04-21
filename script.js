@@ -79,15 +79,21 @@ function initializeMusic(state, elements) {
         updateMusicToggle(musicToggle, true)
     })
 
-    const resumeOnFirstInteraction = () => {
-        if (state.pendingAutoplayResume) {
-            music.muted = false
-            tryStartMusic(state, music, musicToggle, { optimistic: true })
+    let firstInteractionHandled = false
+
+    const unlockAudioOnFirstInteraction = () => {
+        if (firstInteractionHandled) {
+            return
         }
+
+        firstInteractionHandled = true
+        music.muted = false
+        tryStartMusic(state, music, musicToggle, { optimistic: true })
     }
 
-    document.addEventListener('pointerdown', resumeOnFirstInteraction, { once: true })
-    document.addEventListener('keydown', resumeOnFirstInteraction, { once: true })
+    document.addEventListener('pointerdown', unlockAudioOnFirstInteraction, { once: true })
+    document.addEventListener('touchstart', unlockAudioOnFirstInteraction, { once: true, passive: true })
+    document.addEventListener('keydown', unlockAudioOnFirstInteraction, { once: true })
 }
 
 function tryStartMusic(state, music, musicToggle, options = {}) {
