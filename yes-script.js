@@ -1,22 +1,79 @@
-let musicPlaying = false
+document.addEventListener('DOMContentLoaded', initPage)
 
-window.addEventListener('load', () => {
-    launchConfetti()
-
-    // Autoplay music (works since user clicked Yes to get here)
+function initPage() {
     const music = document.getElementById('bg-music')
+    const musicToggle = document.getElementById('music-toggle')
+
+    if (!music || !musicToggle) {
+        return
+    }
+
+    const state = {
+        musicPlaying: false,
+        prefersReducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    }
+
+    musicToggle.addEventListener('click', () => toggleMusic(state, music, musicToggle))
+
+    initializeMusic(state, music, musicToggle)
+
+    if (!state.prefersReducedMotion) {
+        launchConfetti()
+    }
+}
+
+function initializeMusic(state, music, musicToggle) {
     music.volume = 0.3
-    music.play().catch(() => {})
-    musicPlaying = true
-    document.getElementById('music-toggle').textContent = '🔊'
-})
+
+    music.play().then(() => {
+        state.musicPlaying = true
+        updateMusicToggle(musicToggle, true)
+    }).catch(() => {
+        state.musicPlaying = false
+        updateMusicToggle(musicToggle, false)
+
+        document.addEventListener('click', () => {
+            music.play().then(() => {
+                state.musicPlaying = true
+                updateMusicToggle(musicToggle, true)
+            }).catch(() => {})
+        }, { once: true })
+    })
+}
+
+function updateMusicToggle(musicToggle, isPlaying) {
+    musicToggle.textContent = isPlaying ? '🔊' : '🔇'
+    musicToggle.setAttribute('aria-label', isPlaying ? 'Silenciar música' : 'Activar música')
+    musicToggle.setAttribute('aria-pressed', String(isPlaying))
+    musicToggle.title = isPlaying ? 'Silenciar música' : 'Activar música'
+}
+
+function toggleMusic(state, music, musicToggle) {
+    if (state.musicPlaying) {
+        music.pause()
+        state.musicPlaying = false
+        updateMusicToggle(musicToggle, false)
+        return
+    }
+
+    music.play().then(() => {
+        state.musicPlaying = true
+        updateMusicToggle(musicToggle, true)
+    }).catch(() => {
+        state.musicPlaying = false
+        updateMusicToggle(musicToggle, false)
+    })
+}
 
 function launchConfetti() {
+    if (typeof confetti !== 'function') {
+        return
+    }
+
     const colors = ['#ff69b4', '#ff1493', '#ff85a2', '#ffb3c1', '#ff0000', '#ff6347', '#fff', '#ffdf00']
     const duration = 6000
     const end = Date.now() + duration
 
-    // Initial big burst
     confetti({
         particleCount: 150,
         spread: 100,
@@ -24,7 +81,6 @@ function launchConfetti() {
         colors
     })
 
-    // Continuous side cannons
     const interval = setInterval(() => {
         if (Date.now() > end) {
             clearInterval(interval)
@@ -47,17 +103,4 @@ function launchConfetti() {
             colors
         })
     }, 300)
-}
-
-function toggleMusic() {
-    const music = document.getElementById('bg-music')
-    if (musicPlaying) {
-        music.pause()
-        musicPlaying = false
-        document.getElementById('music-toggle').textContent = '🔇'
-    } else {
-        music.play()
-        musicPlaying = true
-        document.getElementById('music-toggle').textContent = '🔊'
-    }
 }

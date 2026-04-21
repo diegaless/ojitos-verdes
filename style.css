@@ -98,14 +98,17 @@ h1 {
 }
 
 #yes-btn {
+    --yes-font-size: 1.6rem;
+    --yes-pad-y: 18px;
+    --yes-pad-x: 45px;
     background: linear-gradient(135deg, #4CAF50, #45a049);
     color: white;
     border: none;
     border-radius: 16px;
-    font-size: 1.6rem;
+    font-size: var(--yes-font-size);
     font-weight: 900;
     font-family: 'Nunito', sans-serif;
-    padding: 18px 45px;
+    padding: var(--yes-pad-y) var(--yes-pad-x);
     cursor: pointer;
     transition: transform 0.15s, box-shadow 0.15s;
     box-shadow: 0 6px 20px rgba(76, 175, 80, 0.45);
@@ -122,11 +125,12 @@ h1 {
 }
 
 #no-btn {
+    --no-font-size: 1rem;
     background: linear-gradient(135deg, #e74c3c, #c0392b);
     color: white;
     border: none;
     border-radius: 12px;
-    font-size: 1rem;
+    font-size: var(--no-font-size);
     font-weight: 700;
     font-family: 'Nunito', sans-serif;
     padding: 12px 28px;
@@ -234,4 +238,27 @@ h1 {
     font-size: 2rem;
     transform: rotate(12deg);
     text-shadow: 0 5px 14px rgba(214, 51, 132, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hearts-bg::before,
+    .hearts-bg::after,
+    h1,
+    .yes-container h1.yes-title,
+    .yes-message {
+        animation: none !important;
+    }
+
+    #cat-gif,
+    #yes-btn,
+    #no-btn,
+    #music-toggle,
+    #tease-toast {
+        transition: none !important;
+    }
+
+    #yes-btn:hover,
+    #music-toggle:hover {
+        transform: none;
+    }
 }

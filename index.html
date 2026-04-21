@@ -1,13 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>¿Quedamos el viernes si ya estás mejor? 💕</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
     <div class="hearts-bg"></div>
@@ -16,22 +17,20 @@
         <h1>¿Quedamos el viernes si ya estás mejor? 💕</h1>
 
         <div class="gif-container">
-            <img id="cat-gif" src="https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif" alt="cute character">
+            <img id="cat-gif" src="assets/gifs/stage-0-normal.gif" alt="Personaje adorable animado">
         </div>
 
         <div class="buttons">
-            <button id="yes-btn" onclick="handleYesClick()">Si</button>
-            <button id="no-btn" onclick="handleNoClick()">No</button>
+            <button id="yes-btn" type="button">Sí</button>
+            <button id="no-btn" type="button">No</button>
         </div>
-        <div id="tease-toast"></div>
+        <div id="tease-toast" aria-live="polite"></div>
     </div>
 
     <audio id="bg-music" loop autoplay muted>
         <source src="music/beabadoobee - Glue Song (Lyrics).mp3" type="audio/mpeg">
     </audio>
 
-    <button id="music-toggle" onclick="toggleMusic()" title="Toggle music">🔊</button>
-
-    <script src="script.js"></script>
+    <button id="music-toggle" type="button" aria-label="Silenciar música" aria-pressed="true" title="Silenciar música">🔊</button>
 </body>
 </html>
