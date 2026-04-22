@@ -10,21 +10,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="hearts-bg"></div>
+    <div class="hearts-bg" aria-hidden="true"></div>
 
-    <div class="container">
+    <main class="container">
         <h1>¿Quedamos el viernes si ya estás mejor? 💕</h1>
 
-        <div class="gif-container">
+        <figure class="gif-container">
             <img id="cat-gif" src="assets/gifs/stage-0-normal.gif" alt="Personaje adorable animado">
-        </div>
+        </figure>
 
         <div class="buttons">
             <button id="yes-btn" type="button">Sí</button>
             <button id="no-btn" type="button">No</button>
         </div>
         <div id="tease-toast" aria-live="polite"></div>
-    </div>
+    </main>
 
     <audio id="bg-music" loop autoplay muted preload="auto">
         <source src="music/beabadoobee - Glue Song (Lyrics).mp3" type="audio/mpeg">
